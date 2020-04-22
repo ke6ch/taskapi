@@ -1,0 +1,59 @@
+version: '3'
+services:
+  proxy:
+    build: ./nginx
+    image: nginx:service
+    container_name: proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx:/usr/share/nginx/html
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf
+  app:
+    build: ./next
+    container_name: app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV}
+  api:
+    build: ./go
+    container_name: api
+    restart: always
+    tty: true
+    depends_on:
+      - db
+    ports:
+      - "1323:1323"
+    volumes:
+      - ./go:/go/src/app
+  db:
+    image: mysql:8.0.19
+    container_name: db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+      - ./mysql/conf.d/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./mysql/initdb.d:/docker-entrypoint-initdb.d
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    environment:
+      PMA_ARBITRARY: ${PMA_ARBITRARY}
+      PMA_HOSTS: ${PMA_HOSTS}
+      PMA_USER: ${PMA_USER}
+      PMA_PASSWORD: ${PMA_PASSWORD}
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+volumes:
+  mysql:
