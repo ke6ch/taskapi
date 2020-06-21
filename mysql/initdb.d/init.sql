@@ -1,4 +1,7 @@
-use clear;
+DROP DATABASE if exists clear;
+CREATE DATABASE clear;
+USE clear;
+
 DROP TABLE if exists tasks;
 
 CREATE TABLE tasks (

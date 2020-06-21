@@ -10,4 +10,7 @@ RUN go get github.com/labstack/echo \
   && go get github.com/labstack/echo/middleware \
   && go get github.com/go-sql-driver/mysql
 
+EXPOSE 1323
+
+# CMD ["go", "run", "go/github.com/ke6ch/api/main.go"]
 CMD ["go", "run", "main.go"]
