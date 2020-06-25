@@ -166,7 +166,7 @@ func DeleteTasks(c echo.Context) error {
 }
 
 // GetMaxID GET /id
-func GetMaxID(c echo.Context) error {
+func GetMaxId(c echo.Context) error {
 	var id int32
 	if err := db.QueryRow("SELECT max(id) FROM tasks").Scan(&id); err != nil {
 		fmt.Println(err)
