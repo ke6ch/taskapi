@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"net/http"
 
 	"github.com/labstack/echo"
@@ -12,31 +11,7 @@ import (
 	"github.com/ke6ch/api/handler"
 )
 
-type Task struct {
-	Id        int    `json:"id"`
-	Name      string `json:"name"`
-	Status    bool   `json:"status"`
-	Order     int    `json:"order"`
-	Timestamp string `json:"timestamp"`
-}
-type Tasks []Task
-
-var (
-	task = Task{}
-	err  error
-)
-
-var db *sql.DB
-
-func init() {
-	db, err = sql.Open("mysql", "user:pass@tcp(db:3306)/clear")
-	if err != nil {
-		panic(err.Error())
-	}
-}
-
-// middleware
-func ServerHeader(next echo.HandlerFunc) echo.HandlerFunc {
+func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSONCharsetUTF8)
 		return next(c)
@@ -48,7 +23,7 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.CORS())
-	e.Use(ServerHeader)
+	e.Use(serverHeader)
 
 	e.GET("/", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Hello World")
@@ -61,8 +36,6 @@ func main() {
 	e.DELETE("/tasks/:id", handler.DeleteTask)
 	e.DELETE("/tasks", handler.DeleteTasks)
 	e.GET("/id", handler.GetMaxId)
-
-	defer db.Close()
 
 	e.Logger.Fatal(e.Start(":1323"))
 }
