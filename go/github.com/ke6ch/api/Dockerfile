@@ -1,6 +1,6 @@
 # Using offical images
 FROM golang:latest
-LABEL maintainer="k <19749261+keb0@users.noreply.github.com>"
+LABEL maintainer="ke6ch <19749261+ke6ch@users.noreply.github.com>"
 
 WORKDIR /go/src/app
 COPY . .
@@ -12,5 +12,4 @@ RUN go get github.com/labstack/echo \
 
 EXPOSE 1323
 
-# CMD ["go", "run", "go/github.com/ke6ch/api/main.go"]
 CMD ["go", "run", "main.go"]

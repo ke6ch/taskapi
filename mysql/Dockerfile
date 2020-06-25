@@ -1,6 +1,6 @@
 # Using official images
 FROM mysql:8.0.19
-LABEL maintainer="k <19749261+keb0@users.noreply.github.com>"
+LABEL maintainer="ke6ch <19749261+ke6ch@users.noreply.github.com>"
 
 VOLUME /var/lib/mysql
 
