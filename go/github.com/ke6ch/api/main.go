@@ -3,12 +3,9 @@ package main
 import (
 	"net/http"
 
+	"github.com/ke6ch/api/handler"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-
-	_ "github.com/go-sql-driver/mysql"
-
-	"github.com/ke6ch/api/handler"
 )
 
 func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
