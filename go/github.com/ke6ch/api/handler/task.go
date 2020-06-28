@@ -19,7 +19,7 @@ var (
 )
 
 func init() {
-	db, err = sql.Open("mysql", "user:pass@tcp(db:3306)/clear")
+	db, err = sql.Open("mysql", "user:pass@tcp(mysql:3306)/clear")
 	if err != nil {
 		panic(err.Error())
 	}
@@ -166,13 +166,9 @@ func DeleteTasks(c echo.Context) error {
 }
 
 // GetMaxID GET /id
-func GetMaxId(c echo.Context) error {
+func GetMaxID(c echo.Context) error {
 	var id int32
-	if err := db.QueryRow("SELECT max(id) FROM tasks").Scan(&id); err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusServiceUnavailable, nil)
-	}
-	defer db.Close()
-
+	// FIXME: Get data with mysql
+	id = 5
 	return c.JSON(http.StatusOK, id)
 }
