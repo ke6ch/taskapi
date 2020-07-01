@@ -4,3 +4,7 @@ kind: Kustomization
 resources:
 - service.yaml
 - deployment.yaml
+
+secretGenerator:
+- name: api-secret
+  env: .env

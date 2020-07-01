@@ -16,6 +16,9 @@ spec:
       - name: api
         image: taskapp/api
         imagePullPolicy: Never
+        envFrom:
+        - secretRef:
+            name: api-secret
         ports:
         - containerPort: 1323
       restartPolicy: Always
