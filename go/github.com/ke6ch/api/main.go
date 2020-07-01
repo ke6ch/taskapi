@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ke6ch/api/handler"
+	"github.com/ke6ch/api/model"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -25,7 +26,8 @@ func main() {
 	e.Use(serverHeader)
 
 	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello World")
+		m := model.Greeting{Message: "Hello World"}
+		return c.JSON(http.StatusOK, m)
 	})
 
 	e.GET("/tasks", handler.GetTasks)

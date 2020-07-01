@@ -3,35 +3,51 @@ package handler
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 	"github.com/ke6ch/api/model"
 	"github.com/labstack/echo"
-
-	// mysql driver
-	_ "github.com/go-sql-driver/mysql"
-)
-
-var (
-	db  *sql.DB
-	err error
 )
 
 func init() {
-	db, err = sql.Open("mysql", "user:pass@tcp(mysql:3306)/clear")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+}
+
+func open() *sql.DB {
+	c := mysql.Config{
+		User:   os.Getenv("MYSQL_USER"),
+		Passwd: os.Getenv("MYSQL_PASSWORD"),
+		Addr:   os.Getenv("MYSQL_ADDRESS"),
+		DBName: os.Getenv("MYSQL_DATABASE"),
+		Net:    "tcp",
+	}
+
+	dsn := c.FormatDSN()
+
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		panic(err.Error())
 	}
+	return db
 }
 
 // GetTasks GET /tasks
 func GetTasks(c echo.Context) error {
+	db := open()
+	defer db.Close()
+
 	rows, err := db.Query("SELECT * FROM tasks order by status desc, `order`")
-	// defer db.Close()
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusServiceUnavailable, nil)
+		c.Logger().Error(err)
+		return c.JSON(http.StatusServiceUnavailable, err)
 	}
 
 	tasks := []*model.Task{}
@@ -41,8 +57,8 @@ func GetTasks(c echo.Context) error {
 		task := new(model.Task)
 		err := rows.Scan(&task.ID, &task.Name, &Status, &task.Order, &task.Timestamp)
 		if err != nil {
-			fmt.Println(err)
-			return c.JSON(http.StatusServiceUnavailable, nil)
+			c.Logger().Error(err)
+			return c.JSON(http.StatusServiceUnavailable, err)
 		}
 
 		if Status[0] == 0 {
@@ -57,6 +73,9 @@ func GetTasks(c echo.Context) error {
 
 // GetTask /tasks/:id
 func GetTask(c echo.Context) error {
+	db := open()
+	defer db.Close()
+
 	task := new(model.Task)
 	tasks := []*model.Task{}
 	var Status []uint8
@@ -65,7 +84,6 @@ func GetTask(c echo.Context) error {
 		fmt.Println(err)
 		return c.JSON(http.StatusServiceUnavailable, nil)
 	}
-	defer db.Close()
 
 	if Status[0] == 0 {
 		task.Status = false
@@ -79,9 +97,11 @@ func GetTask(c echo.Context) error {
 
 // CreateTask POST /tasks
 func CreateTask(c echo.Context) error {
+	db := open()
+
 	// データ取得
 	task := new(model.Task)
-	if err = c.Bind(task); err != nil {
+	if err := c.Bind(task); err != nil {
 		fmt.Println(err)
 		return c.JSON(http.StatusServiceUnavailable, nil)
 	}
@@ -100,6 +120,8 @@ func CreateTask(c echo.Context) error {
 
 // UpdateTask PATCH /tasks/:id
 func UpdateTask(c echo.Context) error {
+	db := open()
+
 	// データ取得
 	id := c.Param("id")
 	var status uint8
@@ -139,6 +161,8 @@ func UpdateTask(c echo.Context) error {
 
 // DeleteTask DELETE /tasks/:id
 func DeleteTask(c echo.Context) error {
+	db := open()
+
 	// delete
 	stmt, err := db.Prepare("DELETE FROM tasks WHERE id = ?")
 	defer db.Close()
@@ -153,6 +177,8 @@ func DeleteTask(c echo.Context) error {
 
 // DeleteTasks DELETE /tasks
 func DeleteTasks(c echo.Context) error {
+	db := open()
+
 	// delete
 	stmt, err := db.Prepare("DELETE FROM tasks WHERE status = 0")
 	defer db.Close()

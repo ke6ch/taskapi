@@ -26,6 +26,11 @@ services:
     tty: true
     depends_on:
       - mysql
+    environment:
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ADDRESS: ${MYSQL_ADDRESS}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     ports:
       - "1323:1323"
     volumes:
