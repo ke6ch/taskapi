@@ -1,6 +1,11 @@
 package model
 
 type (
+	// Message message
+	Message struct {
+		Message string "json:message"
+	}
+
 	// Greeting Greeting
 	Greeting struct {
 		Message string "json:message"

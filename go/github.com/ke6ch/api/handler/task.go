@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -98,6 +99,7 @@ func GetTask(c echo.Context) error {
 // CreateTask POST /tasks
 func CreateTask(c echo.Context) error {
 	db := open()
+	defer db.Close()
 
 	// データ取得
 	task := new(model.Task)
@@ -107,20 +109,38 @@ func CreateTask(c echo.Context) error {
 	}
 
 	// insert
-	stmt, err := db.Prepare("INSERT INTO tasks(id, name, status, `order`, timestamp) VALUES( ?, ?, ?, ?, ? )")
-	defer db.Close()
+	result, err := db.Exec("INSERT INTO tasks(id, name, status, `order`, timestamp) VALUES( ?, ?, ?, ?, ? )", task.ID, task.Name, task.Status, task.Order, time.Now())
 	if err != nil {
-		fmt.Println(err)
 		return c.JSON(http.StatusServiceUnavailable, nil)
 	}
+	lastInsertID, err := result.LastInsertId()
+	if err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
 
-	stmt.Exec(task.ID, task.Name, task.Status, task.Order, time.Now())
-	return c.JSON(http.StatusCreated, nil)
+	// select
+	tasks := []*model.Task{}
+	var Status []uint8
+
+	if err := db.QueryRow("SELECT * FROM tasks where id = "+strconv.FormatInt(lastInsertID, 10)).Scan(&task.ID, &task.Name, &Status, &task.Order, &task.Timestamp); err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+
+	if Status[0] == 0 {
+		task.Status = false
+	} else {
+		task.Status = true
+	}
+	tasks = append(tasks, task)
+
+	return c.JSON(http.StatusOK, tasks)
+
 }
 
 // UpdateTask PATCH /tasks/:id
 func UpdateTask(c echo.Context) error {
 	db := open()
+	defer db.Close()
 
 	// データ取得
 	id := c.Param("id")
@@ -132,69 +152,95 @@ func UpdateTask(c echo.Context) error {
 	}
 
 	// update
-	stmt, err := db.Prepare("UPDATE tasks SET status = ? where id = ?")
-	defer db.Close()
+	result, err := db.Exec("UPDATE tasks SET status = ? where id = ?", status, id)
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusServiceUnavailable, nil)
+		return c.JSON(http.StatusServiceUnavailable, err)
 	}
-	stmt.Exec(status, id)
 
-	// TODO: 構造体の使いまわしできたらコメントアウト外す
-	// 登録したデータを返す
-	// var tasks []Task
-	// var Status []uint8
-	// if err := db.QueryRow("SELECT * FROM tasks where id = (SELECT max(id) FROM tasks)").Scan(&task.Id, &task.Name, &Status, &task.Order, &task.Timestamp); err != nil {
-	// 	panic(err.Error())
-	// }
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+	fmt.Println(rowsAffected)
 
-	// if Status[0] == 0 {
-	// 	task.Status = false
-	// } else {
-	// 	task.Status = true
-	// }
-	// tasks = append(tasks, task)
+	// select
+	task := new(model.Task)
+	tasks := []*model.Task{}
+	var Status []uint8
 
-	// return c.JSON(http.StatusCreated, tasks)
-	return c.JSON(http.StatusCreated, nil)
+	if err := db.QueryRow("SELECT * FROM tasks where id = "+id).Scan(&task.ID, &task.Name, &Status, &task.Order, &task.Timestamp); err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+
+	if Status[0] == 0 {
+		task.Status = false
+	} else {
+		task.Status = true
+	}
+	tasks = append(tasks, task)
+
+	return c.JSON(http.StatusOK, tasks)
 }
 
 // DeleteTask DELETE /tasks/:id
 func DeleteTask(c echo.Context) error {
 	db := open()
+	defer db.Close()
+
+	id := c.Param("id")
 
 	// delete
-	stmt, err := db.Prepare("DELETE FROM tasks WHERE id = ?")
-	defer db.Close()
+	result, err := db.Exec("DELETE FROM tasks WHERE id = ?", id)
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusServiceUnavailable, nil)
+		return c.JSON(http.StatusServiceUnavailable, err)
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+	fmt.Println(rowsAffected)
 
-	stmt.Exec(c.Param("id"))
-	return c.JSON(http.StatusOK, nil)
+	m := model.Message{}
+	if rowsAffected == 0 {
+		return c.JSON(http.StatusNoContent, nil)
+	}
+	m.Message = "ID : " + id + " is deleted"
+	return c.JSON(http.StatusOK, m)
 }
 
 // DeleteTasks DELETE /tasks
 func DeleteTasks(c echo.Context) error {
 	db := open()
+	defer db.Close()
 
 	// delete
-	stmt, err := db.Prepare("DELETE FROM tasks WHERE status = 0")
-	defer db.Close()
+	result, err := db.Exec("DELETE FROM tasks WHERE status = 0")
 	if err != nil {
-		fmt.Println(err)
-		return c.JSON(http.StatusServiceUnavailable, nil)
+		return c.JSON(http.StatusServiceUnavailable, err)
 	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+	fmt.Println(rowsAffected)
 
-	stmt.Exec()
-	return c.JSON(http.StatusOK, nil)
+	m := model.Message{}
+	if rowsAffected == 0 {
+		return c.JSON(http.StatusNoContent, nil)
+	}
+	m.Message = "Tasks is deleted"
+	return c.JSON(http.StatusOK, m)
 }
 
 // GetMaxID GET /id
 func GetMaxID(c echo.Context) error {
+	db := open()
+	defer db.Close()
+
 	var id int32
-	// FIXME: Get data with mysql
-	id = 5
+	if err := db.QueryRow("SELECT max(id) FROM tasks").Scan(&id); err != nil {
+		fmt.Println("LDJFLDJ")
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
 	return c.JSON(http.StatusOK, id)
 }
