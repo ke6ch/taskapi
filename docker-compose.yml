@@ -25,15 +25,15 @@ services:
     restart: always
     tty: true
     depends_on:
-      - db
+      - mysql
     ports:
       - "1323:1323"
     volumes:
       - ./go/github.com/ke6ch/api:/go/src/app
-  db:
+  mysql:
     build: ./mysql
     image: taskapp/mysql
-    container_name: taskapp-compose.db
+    container_name: taskapp-compose.mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -55,7 +55,7 @@ services:
       PMA_USER: ${PMA_USER}
       PMA_PASSWORD: ${PMA_PASSWORD}
     depends_on:
-      - db
+      - mysql
     ports:
       - "8080:80"
 volumes:

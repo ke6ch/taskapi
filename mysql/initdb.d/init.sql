@@ -2,6 +2,12 @@ DROP DATABASE if exists clear;
 CREATE DATABASE clear;
 USE clear;
 
+DROP USER if exists user;
+CREATE USER user@"%" IDENTIFIED BY 'pass';
+CREATE USER user@localhost IDENTIFIED BY 'pass';
+GRANT ALL ON clear.* TO user@"%";
+GRANT ALL ON clear.* TO user@localhost;
+
 DROP TABLE if exists tasks;
 
 CREATE TABLE tasks (

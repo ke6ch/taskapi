@@ -9,4 +9,9 @@ resources:
 configMapGenerator:
 - name: mysql-config
   files:
-  - mysql-config=mysql.config
+  - mysql.config
+
+secretGenerator:
+- name: mysql-secret
+  files:
+  - mysql-secret=root-password.txt

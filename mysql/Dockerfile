@@ -6,7 +6,7 @@ VOLUME /var/lib/mysql
 
 # Copy files
 COPY ./conf.d/my.cnf /etc/mysql/conf.d/my.cnf
-COPY ./initdb.d /docker-entrypoint-initdb.d
+COPY ./initdb.d/init.sql /docker-entrypoint-initdb.d/init.sql
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 EXPOSE 3306
