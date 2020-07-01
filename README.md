@@ -19,4 +19,8 @@ kubectl apply -k ./nginx/base
 kubectl apply -k ./next/base
 kubectl apply -k ./go/github.com/ke6ch/api/base
 kubectl apply -k ./mysql/base
+
+kubect port-forward proxy-,,, 8080:80
+
+localhost:8080
 ```
