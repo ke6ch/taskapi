@@ -4,6 +4,9 @@ services:
     build: ./nginx
     image: taskapp/proxy
     container_name: taskapp-compose.proxy
+    depends_on:
+      - app
+      - api
     ports:
       - "80:80"
     volumes:
