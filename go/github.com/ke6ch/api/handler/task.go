@@ -239,7 +239,6 @@ func GetMaxID(c echo.Context) error {
 
 	var id int32
 	if err := db.QueryRow("SELECT max(id) FROM tasks").Scan(&id); err != nil {
-		fmt.Println("LDJFLDJ")
 		return c.JSON(http.StatusServiceUnavailable, err)
 	}
 	return c.JSON(http.StatusOK, id)
