@@ -25,8 +25,8 @@ type (
 		Timestamp string `json:"timestamp"`
 	}
 
-	// User ユーザ情報
-	User struct {
+	// Auth ログイン
+	Auth struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}

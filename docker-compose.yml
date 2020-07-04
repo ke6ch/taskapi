@@ -66,5 +66,14 @@ services:
       - mysql
     ports:
       - "8080:80"
+  redis:
+    build: ./redis
+    image: taskapp/redis
+    container_name: taskapp-compose.redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis/data:/redis-master-data
 volumes:
   mysql:

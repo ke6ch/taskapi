@@ -12,7 +12,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"github.com/ke6ch/api/model"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func init() {

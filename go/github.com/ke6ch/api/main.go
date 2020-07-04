@@ -5,8 +5,8 @@ import (
 
 	"github.com/ke6ch/api/handler"
 	"github.com/ke6ch/api/model"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func serverHeader(next echo.HandlerFunc) echo.HandlerFunc {
@@ -29,6 +29,9 @@ func main() {
 		m := model.Greeting{Message: "Hello World"}
 		return c.JSON(http.StatusOK, m)
 	})
+
+	e.GET("/login", handler.Login)
+	e.POST("/session", handler.Session)
 
 	e.GET("/tasks", handler.GetTasks)
 	e.GET("/tasks/:id", handler.GetTask)

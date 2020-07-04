@@ -5,7 +5,15 @@ kubectl apply -k ./mysql/base/ >/dev/null 2>&1
 if [ $? = 0 ]; then
   echo "mysql start"
 else
-  echo "Error"
+  echo "mysql error"
+fi
+
+kubectl apply -k ./redis/base/ >/dev/null 2>&1
+
+if [ $? = 0 ]; then
+  echo "redis start"
+else
+  echo "redis error"
 fi
 
 kubectl apply -k ./go/github.com/ke6ch/api/base/ >/dev/null 2>&1 
@@ -13,7 +21,7 @@ kubectl apply -k ./go/github.com/ke6ch/api/base/ >/dev/null 2>&1
 if [ $? = 0 ]; then
   echo "api start"
 else
-  echo "Error"
+  echo "api error"
 fi
 
 kubectl apply -k ./next/base/ >/dev/null 2>&1
@@ -21,7 +29,7 @@ kubectl apply -k ./next/base/ >/dev/null 2>&1
 if [ $? = 0 ]; then
   echo "app start"
 else
-  echo "Error"
+  echo "app error"
 fi
 
 kubectl apply -k ./nginx/base/ >/dev/null 2>&1
@@ -29,6 +37,6 @@ kubectl apply -k ./nginx/base/ >/dev/null 2>&1
 if [ $? = 0 ]; then
   echo "proxy start"
 else
-  echo "Error"
+  echo "proxy error"
 fi
 

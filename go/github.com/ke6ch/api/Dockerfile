@@ -8,7 +8,9 @@ COPY . .
 # Add library
 RUN go get github.com/labstack/echo \
   && go get github.com/labstack/echo/middleware \
-  && go get github.com/go-sql-driver/mysql
+  && go get github.com/go-sql-driver/mysql \
+  && go get github.com/gorilla/sessions \
+  && go get gopkg.in/boj/redistore.v1
 
 EXPOSE 1323
 

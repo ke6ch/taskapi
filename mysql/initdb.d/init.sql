@@ -24,3 +24,14 @@ INSERT INTO tasks (id, name, status, `order`, timestamp) values (2, '2. Flick ri
 INSERT INTO tasks (id, name, status, `order`, timestamp) values (3, '3. Flick left to delete a task', 1, 3, now());
 INSERT INTO tasks (id, name, status, `order`, timestamp) values (4, '4. Flick this task to right to complete', 1, 4, now());
 INSERT INTO tasks (id, name, status, `order`, timestamp) values (5, '5. Flick up to delete all tasks', 1, 5, now());
+
+DROP TABLE if exists users;
+
+CREATE TABLE users (
+  email VARCHAR(256) NOT NULL,
+  `password` VARCHAR(256) NOT NULL,
+  timestamp TIMESTAMP NOT NULL,
+  PRIMARY KEY(email)
+);
+
+INSERT INTO users (email, `password`, timestamp) values ('hoge@example.com', 'passwd', now());
