@@ -22,7 +22,11 @@ func main() {
 
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+	// e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:3000", "http://app:3000"},
+		AllowMethods: []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
+	}))
 	e.Use(serverHeader)
 
 	e.GET("/", func(c echo.Context) error {
@@ -32,6 +36,7 @@ func main() {
 
 	e.GET("/login", handler.Login)
 	e.POST("/session", handler.Session)
+	e.GET("/home", handler.Home)
 
 	e.GET("/tasks", handler.GetTasks)
 	e.GET("/tasks/:id", handler.GetTask)

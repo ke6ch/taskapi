@@ -66,9 +66,10 @@ func Session(c echo.Context) error {
 	defer store.Close()
 
 	// Get a session.
-	session, err := store.Get(c.Request(), "session-name")
+	session, err := store.Get(c.Request(), "user-session")
 	if err != nil {
 		log.Error(err.Error())
+		return c.JSON(http.StatusServiceUnavailable, nil)
 	}
 
 	// 認証処理
@@ -88,8 +89,17 @@ func Session(c echo.Context) error {
 
 	// ユーザが存在しない場合
 	if count == 0 {
-		return c.JSON(http.StatusServiceUnavailable, err)
+		m := model.Message{Message: "ユーザが存在しません。"}
+		return c.JSON(http.StatusUnauthorized, m)
 	}
+
+	// logged_in cookie設定
+	cookie := new(http.Cookie)
+	cookie.Name = "logged_in"
+	cookie.Value = "yes"
+	cookie.Path = "/"
+	cookie.Expires = time.Now().Add(24 * time.Hour)
+	c.SetCookie(cookie)
 
 	// ユーザーを認証済みに設定する。
 	session.Values["authenticated"] = true
@@ -97,6 +107,23 @@ func Session(c echo.Context) error {
 	// Save.
 	if err = sessions.Save(c.Request(), c.Response()); err != nil {
 		fmt.Println("Error saving session: %v", err)
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+
+	return c.JSON(http.StatusOK, nil)
+}
+
+// Home ホーム画面
+func Home(c echo.Context) error {
+	// loginチェック
+	cookie, err := c.Cookie("logged_in")
+	if err != nil {
+		return c.JSON(http.StatusServiceUnavailable, err)
+	}
+
+	// ログイン済みか？
+	if cookie.Value == "no" {
+		return c.JSON(http.StatusUnauthorized, nil)
 	}
 
 	return c.JSON(http.StatusOK, nil)
