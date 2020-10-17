@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: taskapp/redis
+        imagePullPolicy: Never
+        env:
+        - name: MASTER
+          value: "true"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: data
+          mountPath: /redis-master-data
+        - name: config
+          mountPath: /redis-master
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: redis-storage
+      - name: config
+        configMap:
+          name: redis-config
+          items:
+          - key: redis.config
+            path: redis.conf
+      restartPolicy: Always

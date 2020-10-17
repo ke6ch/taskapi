@@ -1,8 +1,2 @@
 # Enviroment
 .env
-
-# Next.js
-next/
-
-# Redis
-redis/data
