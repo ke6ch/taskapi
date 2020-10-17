@@ -5,12 +5,11 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/sessions"
 	"github.com/joho/godotenv"
 	"github.com/ke6ch/api/model"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
-	redisStore "gopkg.in/boj/redistore.v1"
 )
 
 func init() {
@@ -20,13 +19,13 @@ func init() {
 	}
 }
 
-func newRediStore() *redisStore.RediStore {
-	store, err := redisStore.NewRediStore(10, "tcp", "localhost:6379", "", []byte("secret-key"))
-	if err != nil {
-		panic(err)
-	}
-	return store
-}
+// func newRediStore() *redisStore.RediStore {
+// 	store, err := redisStore.NewRediStore(10, "tcp", "localhost:6379", "", []byte("secret-key"))
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// 	return store
+// }
 
 // Login ログインページ
 func Login(c echo.Context) error {
@@ -43,8 +42,6 @@ func Login(c echo.Context) error {
 			c.SetCookie(cookie)
 			return c.JSON(http.StatusOK, nil)
 		}
-		fmt.Println("loginチェックエラー")
-		fmt.Println(err)
 		return c.JSON(http.StatusServiceUnavailable, err)
 	}
 
@@ -53,20 +50,29 @@ func Login(c echo.Context) error {
 		// 有効期限を更新
 		cookie.Expires = time.Now().Add(24 * time.Hour)
 		c.SetCookie(cookie)
+
+		sess, err := session.Get("user-session", c)
+		if err != nil {
+			log.Error(err.Error())
+			return c.JSON(http.StatusServiceUnavailable, nil)
+		}
+		//ログインしているか
+		if b, _ := sess.Values["authenticated"]; b != true {
+			return c.String(http.StatusUnauthorized, "401")
+		}
 		return c.JSON(http.StatusOK, nil)
 	}
-	fmt.Println("おかしい")
 	return c.JSON(http.StatusOK, nil)
 }
 
 // Session ログイン処理
 func Session(c echo.Context) error {
 	// redisStore
-	store := newRediStore()
-	defer store.Close()
+	// store := newRediStore()
+	// defer store.Close()
 
 	// Get a session.
-	session, err := store.Get(c.Request(), "user-session")
+	sess, err := session.Get("user-session", c)
 	if err != nil {
 		log.Error(err.Error())
 		return c.JSON(http.StatusServiceUnavailable, nil)
@@ -102,28 +108,12 @@ func Session(c echo.Context) error {
 	c.SetCookie(cookie)
 
 	// ユーザーを認証済みに設定する。
-	session.Values["authenticated"] = true
+	sess.Values["authenticated"] = true
 
 	// Save.
-	if err = sessions.Save(c.Request(), c.Response()); err != nil {
+	if err = sess.Save(c.Request(), c.Response()); err != nil {
 		fmt.Println("Error saving session: %v", err)
 		return c.JSON(http.StatusServiceUnavailable, err)
-	}
-
-	return c.JSON(http.StatusOK, nil)
-}
-
-// Home ホーム画面
-func Home(c echo.Context) error {
-	// loginチェック
-	cookie, err := c.Cookie("logged_in")
-	if err != nil {
-		return c.JSON(http.StatusServiceUnavailable, err)
-	}
-
-	// ログイン済みか？
-	if cookie.Value == "no" {
-		return c.JSON(http.StatusUnauthorized, nil)
 	}
 
 	return c.JSON(http.StatusOK, nil)
