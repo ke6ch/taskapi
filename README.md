@@ -3,6 +3,8 @@
 ## docker-compose
 
 ```
+docker build -t taskapp/app --build-arg BASE_URL=http://proxy:80 ./next
+
 docker-compose up
 localhost:80
 ```
@@ -11,7 +13,7 @@ localhost:80
 
 ```
 docker build -t taskapp/proxy ./nginx
-docker build -t taskapp/app ./next
+docker build -t taskapp/app --build-arg BASE_URL=localhost:8080 ./next
 docker build -t taskapp/api ./go/github.com/ke6ch/api
 docker build -t taskapp/mysql ./mysql
 
