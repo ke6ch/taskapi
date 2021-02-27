@@ -3,8 +3,8 @@ import App from 'next/app'
 import '../css/tailwind.css'
 import { Provider } from 'react-redux'
 import withRedux from 'next-redux-wrapper'
-// import { store } from '../store'
-import store from '../stores'
+import { store } from '../store'
+// import store from '../stores'
 
 class MyApp extends App {
   render() {
