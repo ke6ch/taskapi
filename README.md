@@ -5,7 +5,7 @@
 ```
 docker build -t taskapp/app --build-arg BASE_URL=http://proxy:80 ./next
 
-docker-compose up
+docker-compose up -d
 localhost:80
 ```
 
