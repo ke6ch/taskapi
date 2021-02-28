@@ -79,7 +79,6 @@ export default function Index() {
             'Content-Type': 'application/json; charset=utf-8',
           },
         })
-        console.log(result)
       }
     }
     setSwipe(initialState)
