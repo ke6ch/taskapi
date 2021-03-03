@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Task, setTasks } from '../modules/task'
-import { getMaxId } from '../modules/id'
-import { RootState } from '../store'
+import { Task, setTasks } from '../stores/slices/task'
+import { fetchMaxId } from '../stores/slices/id'
+import { RootState } from '../stores'
 import Layout from '../components/Layout'
 import Input from '../components/Input'
 import TaskList from '../components/TaskList'
@@ -27,12 +27,12 @@ export default function Index() {
   const [swipe, setSwipe] = useState<Swipe>(initialState)
   const minDistance = 50
   const dispatch = useDispatch()
+  const tasks = useSelector((state: RootState) => state.task.payload)
 
   useEffect(() => {
-    dispatch(getMaxId())
+    dispatch(fetchMaxId())
     dispatch(setTasks())
-  }, [])
-  const tasks = useSelector((state: RootState) => state.task).payload
+  }, [dispatch])
 
   // Input Componentsの表示有無を制御する
   function changeDisplay(status: string | null = null) {

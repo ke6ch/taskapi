@@ -3,8 +3,7 @@ import App from 'next/app'
 import '../css/tailwind.css'
 import { Provider } from 'react-redux'
 import withRedux from 'next-redux-wrapper'
-import { store } from '../store'
-// import store from '../stores'
+import makeStore from '../stores'
 
 class MyApp extends App {
   render() {
@@ -17,4 +16,4 @@ class MyApp extends App {
   }
 }
 
-export default withRedux(store)(MyApp)
+export default withRedux(makeStore)(MyApp)
